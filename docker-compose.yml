@@ -22,10 +22,6 @@ services:
     build: client
     ports:
       - 1337:80
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.vulnado.rule=Host(`vulnado.localhost`)"
-      - "traefik.http.routers.vulnado.entrypoints=web"
     depends_on:
       - traefik
     networks:
