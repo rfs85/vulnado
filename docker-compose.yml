@@ -14,6 +14,9 @@ services:
       - PGUSER=postgres
     depends_on:
       - "db"
+    networks:
+      - internal
+      - web
 
   client:
     build: client
@@ -25,6 +28,9 @@ services:
       - "traefik.http.routers.vulnado.entrypoints=web"
     depends_on:
       - traefik
+    networks:
+      - internal
+      - web
 
   db:
     image: postgres
@@ -34,3 +40,13 @@ services:
 
   internal_site:
     build: internal_site
+    networks:
+      - internal
+      - web
+
+
+networks:
+  web:
+    external: true
+  internal:
+    external: false
