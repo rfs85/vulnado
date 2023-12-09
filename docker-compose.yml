@@ -22,8 +22,6 @@ services:
     build: client
     ports:
       - 1337:80
-    depends_on:
-      - traefik
     networks:
       - internal
       - web
