@@ -16,7 +16,8 @@ services:
       - "db"
     networks:
       - internal
-      - web
+      - websec:
+            ipv4_address: 10.10.10.6
 
   client:
     build: client
@@ -24,7 +25,7 @@ services:
       - 1337:80
     networks:
       - internal
-      - web
+      - websec
 
   db:
     image: postgres
@@ -36,11 +37,11 @@ services:
     build: internal_site
     networks:
       - internal
-      - web
+      - websec
 
 
 networks:
-  web:
+  websec:
     external: true
   internal:
     external: false
