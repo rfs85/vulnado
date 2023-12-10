@@ -1,47 +1,71 @@
-version: "3"
+version: "3.7"
+
 services:
-  vulnado:
+  web:
     build: .
-    ports:
-      - 8080:8080
-    links:
-      - db
-      - internal_site
     environment:
-      - PGPASSWORD=vulnado
-      - PGDATABASE=vulnado
-      - PGHOST=db:5432
-      - PGUSER=postgres
+      NODE_ENV:
+      MONGODB_URI: mongodb://mongo:27017/nodegoat
+    command: sh -c "until nc -z -w 2 mongo 27017 && echo 'mongo is ready for connections' && node artifacts/db-reset.js && npm start; do sleep 2; done"
+    ports:
+      - "4000:4000"
+    networks:
+          websec:
+              ipv4_address: 10.10.10.15
+
+  mongo:
+    image: mongo:4.4
+    user: mongodb
+    expose:
+      - 27017
+    networks:
+          websec:
+              ipv4_address: 10.10.10.16
+              
+              
+  apisix:
+    container_name: "apisix"
+    image: santosomar/api_gateway:latest
+    restart: unless-stopped
+    volumes:
+      - /opt/api_gateway/config.yml:/usr/local/apisix/conf/config.yaml:ro
     depends_on:
-      - "db"
-    networks:
-      - internal
-      - websec:
-            ipv4_address: 10.10.10.6
-
-  client:
-    build: client
+      - etcd
     ports:
-      - 1337:80
+      - "9080:9080"
+      - "9091:9091"
+      - "9443:9443"
     networks:
-      - internal
-      - websec
-
-  db:
-    image: postgres
+          websploitnet2:
+              ipv4_address: 10.10.10.17
+  etcd:
+    container_name: "etcd"
+    image: bitnami/etcd:3.4.15
+    restart: unless-stopped
     environment:
-      - POSTGRES_PASSWORD=vulnado
-      - POSTGRES_DB=vulnado
-
-  internal_site:
-    build: internal_site
+      ETCD_ENABLE_V2: "true"
+      ALLOW_NONE_AUTHENTICATION: "yes"
+      ETCD_ADVERTISE_CLIENT_URLS: "http://0.0.0.0:2379"
+      ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379"
+    ports:
+      - "2379:2379/tcp"
     networks:
-      - internal
-      - websec
-
+          wesec:
+              ipv4_address: 10.10.10.18
+                
 
 networks:
-  websec:
-    external: true
-  internal:
-    external: false
+    websec:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 10.10.10.0/24
+                  gateway: 10.10.10.1
+    apisec:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 10.10.11.0/24
+                  gateway: 10.10.11.1
+
+
