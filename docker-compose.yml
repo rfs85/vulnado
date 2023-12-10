@@ -36,7 +36,7 @@ services:
       - "9091:9091"
       - "9443:9443"
     networks:
-          websploitnet2:
+          websec:
               ipv4_address: 10.10.10.17
   etcd:
     container_name: "etcd"
@@ -50,7 +50,7 @@ services:
     ports:
       - "2379:2379/tcp"
     networks:
-          wesec:
+          websec:
               ipv4_address: 10.10.10.18
                 
 
